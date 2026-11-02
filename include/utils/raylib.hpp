@@ -2,6 +2,10 @@
 
 #include <raylib.h>
 
+/*
+ * return: width and height of texture
+ */
+Vector2 textureSize(Texture2D tex);
 
 /*
  * check if position is visible

@@ -7,6 +7,8 @@
 #include "entities/person.hpp"
 #include "utils/math.hpp"
 #include "utils/display.hpp"
+#include "utils/physics.hpp"
+#include "utils/raylib.hpp"
 #include "physics/rigidbody.hpp"
 #include "context.hpp"
 #include "constants.hpp"

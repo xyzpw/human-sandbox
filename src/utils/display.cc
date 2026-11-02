@@ -1,7 +1,7 @@
 #include "utils/display.hpp"
 #include <raylib.h>
 #include <raymath.h>
-#include "utils/math.hpp"
+#include "utils/raylib.hpp"
 
 void drawTextureCenter(Texture2D tex, Vector2 point, float rotation,
 		       bool flip, Color tint)

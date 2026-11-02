@@ -2,6 +2,11 @@
 #include <raylib.h>
 #include <raymath.h>
 
+Vector2 textureSize(Texture2D tex)
+{
+	return {(float)tex.width, (float)tex.height};
+}
+
 bool cameraIsVisible(const Camera2D &cam, Vector2 pos)
 {
 	Rectangle camrec = {

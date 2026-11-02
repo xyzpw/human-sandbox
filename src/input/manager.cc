@@ -4,6 +4,7 @@
 #include <box2d/box2d.h>
 #include "world.hpp"
 #include "utils/math.hpp"
+#include "utils/physics.hpp"
 #include "physics/manager.hpp"
 
 void InputManager::update(Camera2D &cam, float dt)
