@@ -165,14 +165,13 @@ void World::drawForeground() const
 	};
 
 	for (const auto &it : items) {
-		if (it.isType<Person>()) {
-			const Person &p = it.get<Person>();
-			for (const auto &bp : p.body_parts) {
+		if (const Person *p = it.get_if<Person>()) {
+			for (const auto &bp : p->body_parts) {
 				fn(bp);
 			}
 			continue;
 		}
-		fn(it.get<Entity>());
+		fn(*it.get_if<Entity>());
 	}
 }
 
