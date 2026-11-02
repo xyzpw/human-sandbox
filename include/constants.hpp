@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <raylib.h>
 
 constexpr float METER_TO_PIXEL = 50;
@@ -12,5 +11,3 @@ constexpr int WINDOW_HEIGHT = 630;
 
 constexpr float CAMERA_ZOOM_MIN = 0.1f;
 constexpr float CAMERA_ZOOM_MAX = 5;
-
-const std::string WORLD_BACKGROUND_CELL_NAME = "background_cell.png";

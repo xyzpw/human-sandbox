@@ -12,6 +12,7 @@
 #include "physics/rigidbody.hpp"
 #include "context.hpp"
 #include "constants.hpp"
+#include "common/names.hpp"
 
 static float spawnableDensity(SpawnableType t)
 {
