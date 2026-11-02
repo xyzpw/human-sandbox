@@ -3,6 +3,7 @@
 #include <raymath.h>
 #include <box2d/box2d.h>
 #include "constants.hpp"
+#include "common/names.hpp"
 #include "assets.hpp"
 #include "toast.hpp"
 #include "ui/sidebar.hpp"
@@ -27,14 +28,14 @@ void Game::initialize()
 		.zoom = 1
 	};
 
-	Music amb = asset_manager.getMusic("ambience.mp3");
+	Music amb = asset_manager.getMusic(MUSIC_AMBIENCE_NAME);
 	SetMusicVolume(amb, 0.1f);
 	PlayMusicStream(amb);
 }
 
 void Game::unload()
 {
-	Music amb = asset_manager.getMusic("ambience.mp3");
+	Music amb = asset_manager.getMusic(MUSIC_AMBIENCE_NAME);
 	if (IsMusicStreamPlaying(amb))
 		StopMusicStream(amb);
 
@@ -56,7 +57,7 @@ void Game::update(float dt)
 	physics.update(dt);
 	context.camera_shaker.update(context.camera, dt);
 	toast_manager.update(dt);
-	UpdateMusicStream(asset_manager.getMusic("ambience.mp3"));
+	UpdateMusicStream(asset_manager.getMusic(MUSIC_AMBIENCE_NAME));
 
 	if (IsKeyPressed(KEY_GRAVE))
 		fps_visible = !fps_visible;
