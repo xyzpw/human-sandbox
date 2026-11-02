@@ -9,16 +9,6 @@ float clamp01(float f)
 	return Clamp(f, 0, 1);
 }
 
-bool rectIsInside(Rectangle rect, Rectangle smaller)
-{
-	bool fail = smaller.x < rect.x;
-	fail |= smaller.x + smaller.width > rect.x + rect.width;
-	fail |= smaller.y < rect.y;
-	fail |= smaller.y + smaller.height > rect.y + rect.height;
-
-	return !fail;
-}
-
 Vector2 textureSize(Texture2D tex)
 {
 	return {(float)tex.width, (float)tex.height};

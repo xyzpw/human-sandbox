@@ -6,15 +6,6 @@
 float clamp01(float f);
 
 /*
- * check if rectangle is inside another
- * @rect: the larger rectangle
- * @smaller: the rectangle which should be inside the larger one
- *
- * return: true if small rectangle is inside larger
- */
-bool rectIsInside(Rectangle rect, Rectangle smaller);
-
-/*
  * return: width and height of texture
  */
 Vector2 textureSize(Texture2D tex);
