@@ -70,18 +70,14 @@ static b2Vec2 bodyPartJointPosition(const BodyPart &bp, bool top = false)
  * connect two body parts with a joint
  * @a: first body part connected to joint
  * @b: second body part connected to joint
- * @h: spring hertz
- * @d: damping ratio
  * @top: if true, use position at top of first body part;
  *       otherwise, use position at bottom
  */
 static void bodyPartAddJoint(b2WorldId world, BodyPart &a, BodyPart &b,
-			     float h, float d, bool top = false)
+			     bool top = false)
 {
 	b2Vec2 pos = bodyPartJointPosition(a, top);
 	JointRev rev(world, a.rigidbody.id, b.rigidbody.id, pos, false);
-	rev.set_hertz(h);
-	rev.set_damping_ratio(d);
 	rev.enableSpring(true);
 	rev.enableMotor(true);
 	rev.setMotorSpeed(0);
@@ -249,8 +245,8 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 	using enum BodyPartType;
 
 	auto fn_connect = [&](BodyPart &prev, BodyPart &curr,
-			      float h, float d, bool top = false) {
-		bodyPartAddJoint(world, prev, curr, h, d, top);
+			      bool top = false) {
+		bodyPartAddJoint(world, prev, curr, top);
 	};
 
 	alive = true;
@@ -272,7 +268,7 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 
 		/* connect torso with joints */
 		if (i > 0 && i < 4) {
-			fn_connect(body_parts[i - 1], bp, 0.23, 0.85);
+			fn_connect(body_parts[i - 1], bp, false);
 		}
 
 		body_parts.push_back(bp);
@@ -291,20 +287,20 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 	}
 
 	/* top torso to upper arm*/
-	fn_connect(body_parts[1], body_parts[4], 0.2, 0.85, true);
-	fn_connect(body_parts[1], body_parts[5], 0.2, 0.85, true); // foreground
+	fn_connect(body_parts[1], body_parts[4], true);
+	fn_connect(body_parts[1], body_parts[5], true); // foreground
 	/* upper arm to lower arm*/
-	fn_connect(body_parts[4], body_parts[6], 0.2, 0.85);
-	fn_connect(body_parts[5], body_parts[7], 0.2, 0.85); // foreground
+	fn_connect(body_parts[4], body_parts[6]);
+	fn_connect(body_parts[5], body_parts[7]); // foreground
 	/* lower torso to upper leg */
-	fn_connect(body_parts[3], body_parts[8], 1, 0.85);
-	fn_connect(body_parts[3], body_parts[9], 1, 0.85); // foreground
+	fn_connect(body_parts[3], body_parts[8]);
+	fn_connect(body_parts[3], body_parts[9]); // foreground
 	/* upper leg to lower leg */
-	fn_connect(body_parts[8], body_parts[10], 0.6, 0.85);
-	fn_connect(body_parts[9], body_parts[11], 0.6, 0.85); // foreground
+	fn_connect(body_parts[8], body_parts[10]);
+	fn_connect(body_parts[9], body_parts[11]); // foreground
 	/* lower leg to foot */
-	fn_connect(body_parts[10], body_parts[12], 0.6, 0.85);
-	fn_connect(body_parts[11], body_parts[13], 0.6, 0.85); // foreground
+	fn_connect(body_parts[10], body_parts[12]);
+	fn_connect(body_parts[11], body_parts[13]); // foreground
 
 	/*
 	 * set and enable revolute joint limits
