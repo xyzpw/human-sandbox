@@ -29,6 +29,10 @@ struct JointRev {
 	{
 		return b2RevoluteJoint_GetSpringHertz(id);
 	}
+	float getTorque() const
+	{
+		return b2Joint_GetConstraintTorque(id);
+	}
 
 	void set_hertz(float f)
 	{
