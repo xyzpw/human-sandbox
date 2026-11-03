@@ -4,6 +4,7 @@
 #include <box2d/box2d.h>
 #include <string>
 #include <cassert>
+#include <cmath>
 #include "common/types.hpp"
 #include "assets.hpp"
 #include "utils/math.hpp"
@@ -132,24 +133,37 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 	float volume = Normalize(cont.camera.zoom, CAMERA_ZOOM_MIN,
 				 CAMERA_ZOOM_MAX);
 
-	auto fn = [&](const b2ContactHitEvent &hit, b2JointId jt) {
-		if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
-			return;
+	auto fn_torque_stress = [&](const JointRev &jt) {
+		if (!b2RevoluteJoint_IsLimitEnabled(jt.id))
+			return 0.f;
 
-		float impulse = hit.approachSpeed * rb.getMass();
-		float tor = b2Joint_GetConstraintTorque(jt);
-		if (impulse < bp.break_force && tor < bp.break_force_torque)
-			return;
-		if (bp.bone_integrity == 0)
-			return;
-
-		bp.breakBone();
-		if (visible && tor > bp.break_force_torque)
-			asset_manager.playSound("bone_snap.mp3", volume);
+		float tor = std::fabs(jt.getTorque());
+		float stress = (tor / bp.break_force_torque - 1) * GetFrameTime();
+		return clamp01(stress);
 	};
+
+	float stress_max = 0;
 	for (auto &jt : bp.joints) {
 		for (int i = 0; i < contacts.hitCount; i++) {
-			fn(contacts.hitEvents[i], jt.id);
+			const auto &hit = contacts.hitEvents[i];
+			if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
+				continue;
+
+			float momentum = rb.getMass() * hit.approachSpeed;
+			if (bp.bone_integrity > 0 && momentum > bp.break_force)
+				bp.breakBone();
+		}
+
+		float f = fn_torque_stress(jt);
+		if (f > stress_max)
+			stress_max = f;
+	}
+	if (stress_max > 0 && bp.bone_integrity > 0) {
+		bp.bone_integrity = clamp01(bp.bone_integrity - stress_max);
+		if (bp.bone_integrity == 0) {
+			bp.breakBone();
+			if (visible)
+				asset_manager.playSound("bone_snap.mp3", volume);
 		}
 	}
 }
