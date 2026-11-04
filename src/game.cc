@@ -61,8 +61,14 @@ void Game::update(float dt)
 
 	if (IsKeyPressed(KEY_GRAVE))
 		fps_visible = !fps_visible;
-	if (IsKeyPressed(KEY_SPACE))
+	if (IsKeyPressed(KEY_SPACE)) {
 		physics.paused = !physics.paused;
+		const Music &amb = asset_manager.getMusic(MUSIC_AMBIENCE_NAME);
+		if (physics.paused)
+			PauseMusicStream(amb);
+		else
+			PlayMusicStream(amb);
+	}
 }
 
 void Game::draw() const
