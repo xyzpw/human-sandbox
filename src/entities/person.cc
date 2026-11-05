@@ -239,6 +239,9 @@ void BodyPart::loadDefaults(BodyPartType t)
 void BodyPart::disable()
 {
 	for (auto &jt : joints) {
+		if (!jt)
+			continue;
+
 		jt.set_hertz(1);
 		jt.set_damping_ratio(1);
 		jt.setMotorSpeed(0);
@@ -248,6 +251,9 @@ void BodyPart::disable()
 void BodyPart::breakBone()
 {
 	for (auto &jt : joints) {
+		if (!jt)
+			continue;
+
 		jt.enable_limit(false);
 	}
 
