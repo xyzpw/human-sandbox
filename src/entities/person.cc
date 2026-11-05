@@ -125,13 +125,12 @@ static void bodyPartSetLayers(BodyPart &bp)
 static void bodyPartIntegrityValidate(BodyPart &bp,
 				      const GameContext &cont)
 {
+	const Camera2D &cam = cont.camera;
 	const b2ContactEvents &contacts = cont.physics.contact_events;
 	const Rigidbody &rb = bp.rigidbody;
-	Vector2 pos = b2ToVec(rb.getPosition()) * METER_TO_PIXEL;
-	pos = GetWorldToScreen2D(pos, cont.camera);
-	bool visible = cameraIsVisible(cont.camera, pos);
-	float volume = Normalize(cont.camera.zoom, CAMERA_ZOOM_MIN,
-				 CAMERA_ZOOM_MAX);
+
+	bool visible = cameraIsVisible(cam, bodyScreenPosition(rb.id, cam));
+	float volume = Normalize(cam.zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX);
 
 	auto fn_torque_stress = [&](const JointRev &jt) {
 		if (!b2RevoluteJoint_IsLimitEnabled(jt.id))
