@@ -1,6 +1,7 @@
 #pragma once
 
 #include <raylib.h>
+#include <box2d/box2d.h>
 
 /*
  * return: width and height of texture
@@ -14,3 +15,5 @@ Vector2 textureSize(Texture2D tex);
  * return: true if position is visible to camera
  */
 bool cameraIsVisible(const Camera2D &cam, Vector2 pos);
+
+Vector2 bodyScreenPosition(b2BodyId id, Camera2D cam);
