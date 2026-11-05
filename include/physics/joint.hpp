@@ -75,4 +75,6 @@ struct JointRev {
 	{
 		b2RevoluteJoint_EnableSpring(id, b);
 	}
+
+	explicit operator bool() const { return b2Joint_IsValid(id); };
 };
