@@ -35,6 +35,7 @@ enum CollisionCategory : uint16_t {
 
 enum ViewFlags : uint16_t {
 	VIEW_FLAGS_FPS      = 0x0001,
+	VIEW_FLAGS_DETAILED = 0x0002,
 };
 
 // includes all collision categories

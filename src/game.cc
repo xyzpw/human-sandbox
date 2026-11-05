@@ -7,6 +7,28 @@
 #include "assets.hpp"
 #include "toast.hpp"
 #include "ui/sidebar.hpp"
+#include "utils/raylib.hpp"
+
+static void drawFlagDetailed(const World &world, Camera2D cam)
+{
+	static auto fn_col = [](float hp) {
+		unsigned char r = 255 * (1 - hp);
+		unsigned char g = 255 * hp;
+		return (Color){r, g, 0, 255};
+	};
+
+	for (const auto &it : world.items) {
+		if (!it.isType<Person>())
+			continue;
+
+		const Person &per = *it.get_if<Person>();
+
+		for (const auto &bp : per.body_parts) {
+			Vector2 pos = bodyScreenPosition(bp.rigidbody.id, cam);
+			DrawCircleV(pos, 2, fn_col(bp.bone_integrity));
+		}
+	}
+}
 
 void Game::initialize()
 {
@@ -61,6 +83,8 @@ void Game::update(float dt)
 
 	if (IsKeyPressed(KEY_GRAVE))
 		view_bits ^= VIEW_FLAGS_FPS;
+	if (IsKeyPressed(KEY_S))
+		view_bits ^= VIEW_FLAGS_DETAILED;
 	if (IsKeyPressed(KEY_SPACE)) {
 		physics.paused = !physics.paused;
 		const Music &amb = asset_manager.getMusic(MUSIC_AMBIENCE_NAME);
@@ -90,6 +114,9 @@ void Game::drawOverlay() const
 		static int x = GetScreenWidth() - 90;
 		DrawFPS(x, 10);
 	}
+
+	if (view_bits & VIEW_FLAGS_DETAILED)
+		drawFlagDetailed(world, context.camera);
 }
 
 void Game::cameraMove(Vector2 delta)
