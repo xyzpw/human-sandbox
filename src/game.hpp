@@ -16,7 +16,7 @@ struct Game {
 
 	World world;
 
-	bool fps_visible = false;
+	uint16_t view_bits = 0;
 
 	void initialize();
 	void unload();

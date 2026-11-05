@@ -60,7 +60,7 @@ void Game::update(float dt)
 	UpdateMusicStream(asset_manager.getMusic(MUSIC_AMBIENCE_NAME));
 
 	if (IsKeyPressed(KEY_GRAVE))
-		fps_visible = !fps_visible;
+		view_bits ^= VIEW_FLAGS_FPS;
 	if (IsKeyPressed(KEY_SPACE)) {
 		physics.paused = !physics.paused;
 		const Music &amb = asset_manager.getMusic(MUSIC_AMBIENCE_NAME);
@@ -86,7 +86,7 @@ void Game::drawOverlay() const
 
 	sidebar.draw();
 
-	if (fps_visible) {
+	if (view_bits & VIEW_FLAGS_FPS) {
 		static int x = GetScreenWidth() - 90;
 		DrawFPS(x, 10);
 	}

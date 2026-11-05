@@ -33,6 +33,10 @@ enum CollisionCategory : uint16_t {
 	COLLISION_LEG_FG     = 0x0010,
 };
 
+enum ViewFlags : uint16_t {
+	VIEW_FLAGS_FPS      = 0x0001,
+};
+
 // includes all collision categories
 constexpr uint16_t COLLISION_ALL = COLLISION_CENTER
 				 | COLLISION_ARM_BG
