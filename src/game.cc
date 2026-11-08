@@ -8,7 +8,7 @@
 #include "toast.hpp"
 #include "ui/sidebar.hpp"
 #include "utils/raylib.hpp"
-#include "utils/physics.hpp"
+#include "effects.hpp"
 
 static void drawFlagDetailed(const World &world, Camera2D cam)
 {
@@ -29,38 +29,6 @@ static void drawFlagDetailed(const World &world, Camera2D cam)
 			Vector2 pos = bodyScreenPosition(bp.rigidbody.id, cam);
 			DrawCircleV(pos, 2, fn_col(bp.bone_integrity));
 		}
-	}
-}
-
-static void checkCameraShake(GameContext &context)
-{
-	if (context.camera.zoom < 1)
-		return;
-
-	Camera2D &cam = context.camera;
-	const b2ContactEvents &contacts = context.physics.contact_events;
-
-	for (int i = 0; i < contacts.hitCount; i++) {
-		const b2ContactHitEvent &hit = contacts.hitEvents[i];
-		Vector2 pos = vecScreenPosition(hit.point, cam);
-		if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB) ||
-		    !cameraIsVisible(cam, pos))
-			continue;
-
-		b2BodyType type_a = shapeBodyType(hit.shapeIdA);
-		b2BodyType type_b = shapeBodyType(hit.shapeIdB);
-		if (type_a == type_b)
-			continue;
-
-		float mass = type_b == b2_staticBody
-			? b2Body_GetMass(b2Shape_GetBody(hit.shapeIdA))
-			: b2Body_GetMass(b2Shape_GetBody(hit.shapeIdB));
-		float momentum = mass * hit.approachSpeed;
-		if (momentum < 100)
-			continue;
-
-		context.camera_shaker.initialize(cam.offset, 0.05f, 10, 5);
-		return;
 	}
 }
 
@@ -115,7 +83,7 @@ void Game::update(float dt)
 	toast_manager.update(dt);
 	UpdateMusicStream(asset_manager.getMusic(MUSIC_AMBIENCE_NAME));
 
-	checkCameraShake(context);
+	effectsProcessCollision(context);
 
 	if (IsKeyPressed(KEY_GRAVE))
 		view_bits ^= VIEW_FLAGS_FPS;
