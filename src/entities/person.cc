@@ -129,6 +129,11 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 	const b2ContactEvents &contacts = cont.physics.contact_events;
 	const Rigidbody &rb = bp.rigidbody;
 
+	if (bp.bone_integrity > 0 && bp.bone_integrity < 1) {
+		float f = 0.1f * GetFrameTime();
+		bp.bone_integrity += bp.bone_integrity * f;
+	}
+
 	bool visible = cameraIsVisible(cam, bodyScreenPosition(rb.id, cam));
 	float volume = Normalize(cam.zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX);
 
