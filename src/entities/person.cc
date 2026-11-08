@@ -154,6 +154,10 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 				continue;
 
 			float momentum = rb.getMass() * hit.approachSpeed;
+			if (momentum > bp.impact_resistance) {
+				float f = momentum / bp.impact_resistance;
+				bp.health -= 0.5f * f;
+			}
 			if (bp.bone_integrity > 0 && momentum > bp.break_force)
 				bp.breakBone();
 		}
@@ -166,6 +170,7 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 		bp.bone_integrity = clamp01(bp.bone_integrity - stress_max);
 		if (bp.bone_integrity == 0) {
 			bp.breakBone();
+			bp.health = 0;
 			if (visible)
 				asset_manager.playSound("bone_snap.mp3", volume);
 		}
@@ -203,10 +208,12 @@ void BodyPart::loadDefaults(BodyPartType t)
 
 	type = t;
 	tint = PERSON_TINT;
+	health = 1;
 	bone_integrity = 1;
 
 	switch (t) {
 	case head:
+		impact_resistance = 100;
 		break_force = 200;
 		break_force_torque = 80;
 		texture = asset_manager.getTexture("person_head.png");
@@ -214,23 +221,27 @@ void BodyPart::loadDefaults(BodyPartType t)
 	case torso_top:
 	case torso_middle:
 	case torso_bottom:
+		impact_resistance = 300;
 		break_force = t == torso_top ? 3000 : 1275;
 		break_force_torque = 1000;
 		texture = asset_manager.getTexture("person_body.png");
 		break;
 	case arm_upper:
 	case arm_lower:
+		impact_resistance = 500;
 		break_force = 2000;
 		break_force_torque = 400;
 		texture = asset_manager.getTexture("person_limb.png");
 		break;
 	case leg_upper:
 	case leg_lower:
+		impact_resistance = 500;
 		break_force = t == leg_upper ? 4000 : 2500;
 		break_force_torque = 400;
 		texture = asset_manager.getTexture("person_limb.png");
 		break;
 	case foot:
+		impact_resistance = 500;
 		break_force = 2000;
 		break_force_torque = 200;
 		texture = asset_manager.getTexture("person_foot.png");

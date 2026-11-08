@@ -45,11 +45,13 @@ struct BodyPart : Entity {
 	std::vector<JointRev> joints;
 	bool background;
 
+	float impact_resistance;
 	// force required to break bone
 	float break_force;
 	// torque required to break bone
 	float break_force_torque;
 
+	float health;
 	float bone_integrity;
 
 	/*
