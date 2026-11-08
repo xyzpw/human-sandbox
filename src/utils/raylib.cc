@@ -27,6 +27,5 @@ Vector2 vecScreenPosition(b2Vec2 v, Camera2D cam)
 
 Vector2 bodyScreenPosition(b2BodyId id, Camera2D cam)
 {
-	Vector2 pos = b2ToVec(b2Body_GetPosition(id)) * METER_TO_PIXEL;
-	return GetWorldToScreen2D(pos, cam);
+	return vecScreenPosition(b2Body_GetPosition(id), cam);
 }
