@@ -13,6 +13,7 @@
 static void drawFlagDetailed(const World &world, Camera2D cam)
 {
 	static auto fn_col = [](float hp) {
+		hp = Clamp(hp, 0, 1);
 		unsigned char r = 255 * (1 - hp);
 		unsigned char g = 255 * hp;
 		return (Color){r, g, 0, 255};
