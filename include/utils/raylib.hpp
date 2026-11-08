@@ -16,4 +16,12 @@ Vector2 textureSize(Texture2D tex);
  */
 bool cameraIsVisible(const Camera2D &cam, Vector2 pos);
 
+/*
+ * get screen position of box2d vector
+ *
+ * NOTE: vector will be scaled from meters to pixels
+ *
+ * return: world to screen position
+ */
+Vector2 vecScreenPosition(b2Vec2 v, Camera2D cam);
 Vector2 bodyScreenPosition(b2BodyId id, Camera2D cam);

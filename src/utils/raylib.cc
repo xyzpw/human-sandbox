@@ -20,6 +20,11 @@ bool cameraIsVisible(const Camera2D &cam, Vector2 pos)
 	return CheckCollisionPointRec(pos, camrec);
 }
 
+Vector2 vecScreenPosition(b2Vec2 v, Camera2D cam)
+{
+	return GetWorldToScreen2D(b2ToVec(v) * METER_TO_PIXEL, cam);
+}
+
 Vector2 bodyScreenPosition(b2BodyId id, Camera2D cam)
 {
 	Vector2 pos = b2ToVec(b2Body_GetPosition(id)) * METER_TO_PIXEL;
