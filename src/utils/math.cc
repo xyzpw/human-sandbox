@@ -8,6 +8,11 @@ float clamp01(float f)
 	return Clamp(f, 0, 1);
 }
 
+bool isOpenUnitInterval(float f)
+{
+	return f > 0 && f < 1;
+}
+
 b2Vec2 vecToB2(Vector2 v)
 {
 	return (b2Vec2){v.x, -v.y};
