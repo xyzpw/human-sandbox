@@ -122,6 +122,22 @@ static void bodyPartSetLayers(BodyPart &bp)
 	bp.rigidbody.setCollisionMask(COLLISION_ALL & ~ex);
 }
 
+static float poseBodyPartHertz(PoseType p, BodyPartType bp)
+{
+	using enum BodyPartType;
+	const PoseConfig &conf = pose_configs[(int)p];
+
+	if (bp == torso_bottom)
+		return conf.torso_bottom_frequency;
+	int i = (int)bp;
+	if (i < (int)arm_upper)
+		return conf.base_frequency;
+	else if (i < (int)leg_upper)
+		return conf.arm_frequency;
+	else
+		return conf.leg_frequency;
+}
+
 static void bodyPartIntegrityValidate(BodyPart &bp,
 				      const GameContext &cont)
 {
@@ -391,20 +407,12 @@ void Person::setPose(PoseType p)
 {
 	using enum BodyPartType;
 
-	const PoseConfig &conf = pose_configs[(int)p];
-
+	float damp = pose_configs[(int)p].base_damping;
 	for (auto &bp : body_parts) {
+		float hz = poseBodyPartHertz(p, bp.type);
 		for (auto &jt : bp.joints) {
-			float hertz;
-			int i = (int)bp.type;
-			if (i <= (int)arm_lower)
-				hertz = conf.arm_frequency;
-			else if (i >= (int)leg_upper)
-				hertz = conf.leg_frequency;
-			else
-				hertz = conf.base_frequency;
-			jt.set_hertz(hertz);
-			jt.set_damping_ratio(conf.base_damping);
+			jt.set_hertz(hz);
+			jt.set_damping_ratio(damp);
 		}
 	}
 }
