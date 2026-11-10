@@ -156,6 +156,12 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 		float stress = (tor / bp.break_force_torque - 1) * GetFrameTime();
 		return clamp01(stress);
 	};
+	auto fn_hit_valid = [&](const b2ContactHitEvent &e) {
+		if (B2_ID_EQUALS(e.shapeIdA, e.shapeIdB))
+			return false;
+		return B2_ID_EQUALS(e.shapeIdA, rb.id) ||
+			B2_ID_EQUALS(e.shapeIdB, rb.id);
+	};
 
 	float stress_max = 0;
 	for (auto &jt : bp.joints) {
@@ -165,7 +171,7 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 	}
 	for (int i = 0; i < contacts.hitCount; i++) {
 		const b2ContactHitEvent &hit = contacts.hitEvents[i];
-		if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
+		if (!fn_hit_valid(hit))
 			continue;
 
 		float momentum = rb.getMass() * hit.approachSpeed;
