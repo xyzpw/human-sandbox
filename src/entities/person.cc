@@ -159,23 +159,20 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 
 	float stress_max = 0;
 	for (auto &jt : bp.joints) {
-		for (int i = 0; i < contacts.hitCount; i++) {
-			const auto &hit = contacts.hitEvents[i];
-			if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
-				continue;
-
-			float momentum = rb.getMass() * hit.approachSpeed;
-			if (momentum > bp.impact_resistance) {
-				float f = momentum / bp.impact_resistance;
-				bp.health -= 0.5f * f;
-			}
-			if (bp.bone_integrity > 0 && momentum > bp.break_force)
-				bp.breakBone();
-		}
-
 		float f = fn_torque_stress(jt);
 		if (f > stress_max)
 			stress_max = f;
+	}
+	for (int i = 0; i < contacts.hitCount; i++) {
+		const b2ContactHitEvent &hit = contacts.hitEvents[i];
+		if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
+			continue;
+
+		float momentum = rb.getMass() * hit.approachSpeed;
+		if (momentum > bp.impact_resistance)
+			bp.health -= momentum / (2 * bp.impact_resistance);
+		if (bp.bone_integrity > 0 && momentum > bp.break_force)
+			bp.breakBone();
 	}
 	if (stress_max > 0 && bp.bone_integrity > 0) {
 		bp.bone_integrity = clamp01(bp.bone_integrity - stress_max);
