@@ -27,7 +27,7 @@ static void drawFlagDetailed(const World &world, Camera2D cam)
 
 		for (const auto &bp : per.body_parts) {
 			Vector2 pos = bodyScreenPosition(bp.rigidbody.id, cam);
-			DrawCircleV(pos, 2, fn_col(bp.bone_integrity));
+			DrawCircleV(pos, 2, fn_col(bp.healthLowest()));
 		}
 	}
 }

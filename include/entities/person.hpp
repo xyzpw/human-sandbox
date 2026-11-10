@@ -61,6 +61,11 @@ struct BodyPart : Entity {
 
 	void disable();
 	void breakBone();
+
+	float healthLowest() const
+	{
+		return health < bone_integrity ? health : bone_integrity;
+	}
 };
 
 struct Person {
