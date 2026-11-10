@@ -269,12 +269,14 @@ void BodyPart::loadDefaults(BodyPartType t)
 
 void BodyPart::disable()
 {
+	float hz = poseBodyPartHertz(PoseType::rest, type);
+	float damp = pose_configs[(int)PoseType::rest].base_damping;
 	for (auto &jt : joints) {
 		if (!jt)
 			continue;
 
-		jt.set_hertz(1);
-		jt.set_damping_ratio(1);
+		jt.set_hertz(hz);
+		jt.set_damping_ratio(damp);
 		jt.setMotorSpeed(0);
 	}
 }
