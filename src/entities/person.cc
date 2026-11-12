@@ -41,11 +41,11 @@ static Vector2 personBodyPartOffset(BodyPartType t)
 	case arm_lower:
 	        return {0, 5};
 	case leg_upper:
-	        return {0, 28};
+	        return {0, 27};
 	case leg_lower:
-	        return {0, 44};
+	        return {0, 42};
 	case foot:
-	        return {2, 54};
+	        return {2, 52};
 	default:
 		 return {};
 	}
