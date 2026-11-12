@@ -165,6 +165,9 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 
 	float stress_max = 0;
 	for (auto &jt : bp.joints) {
+		if (!jt)
+			continue;
+
 		float f = fn_torque_stress(jt);
 		if (f > stress_max)
 			stress_max = f;
