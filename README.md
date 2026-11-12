@@ -1,6 +1,8 @@
 # Human Sandbox
 Sandbox game for Linux, made with raylib and box2d.
 
+![](https://img.shields.io/github/downloads/xyzpw/human-sandbox/total)
+
 ## Prerequisites
 - raylib
 - box2d
