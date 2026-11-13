@@ -10,4 +10,4 @@ constexpr int WINDOW_WIDTH = 1120;
 constexpr int WINDOW_HEIGHT = 630;
 
 constexpr float CAMERA_ZOOM_MIN = 0.1f;
-constexpr float CAMERA_ZOOM_MAX = 5;
+constexpr float CAMERA_ZOOM_MAX = 10;
