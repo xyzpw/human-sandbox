@@ -75,6 +75,7 @@ struct Person {
 	std::vector<BodyPart> body_parts;
 
 	bool alive;
+	float consciousness;
 
 	void create(b2WorldId world, Vector2 pos, bool flip = false);
 	void destroy();

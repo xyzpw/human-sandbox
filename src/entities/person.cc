@@ -227,6 +227,13 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 		if (paralyze)
 			bp.disable();
 	}
+
+	if (heart_stopped && per.consciousness > 0) {
+		float f = GetFrameTime() / 8;
+		per.consciousness = clamp01(per.consciousness - f);
+		if (per.consciousness == 0)
+			per.setPose(PoseType::rest);
+	}
 }
 
 void BodyPart::loadDefaults(BodyPartType t)
@@ -314,6 +321,7 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 	};
 
 	alive = true;
+	consciousness = 1;
 
 	int size = (int)BodyPartType::_count;
 	for (int i = 0; i < size; i++) {
