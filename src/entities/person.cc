@@ -207,8 +207,14 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 	using enum BodyPartType;
 
 	bool paralyze = false;
+	bool heart_stopped = !per.hasHeartbeat();
 	for (auto &bp : per.body_parts) {
 		bodyPartIntegrityValidate(bp, cont);
+
+		if (heart_stopped) {
+			float f = 1.f / (bp.hasBrain() ? 15 : 300);
+			bp.health -= f * GetFrameTime();
+		}
 
 		if (!per.alive)
 			continue;

@@ -66,6 +66,9 @@ struct BodyPart : Entity {
 	{
 		return health < bone_integrity ? health : bone_integrity;
 	}
+
+	bool hasHeart() const { return type == BodyPartType::torso_top; }
+	bool hasBrain() const { return type == BodyPartType::head; }
 };
 
 struct Person {
@@ -81,6 +84,15 @@ struct Person {
 	void setPose(PoseType t);
 
 	void kill();
+
+	bool hasHeartbeat() const
+	{
+		for (const auto &p : body_parts) {
+			if (p.hasHeart())
+				return p.health > 0;
+		}
+		return false;
+	}
 
 	BodyPart *getBodyPart(BodyPartType t, bool background)
 	{
