@@ -213,10 +213,9 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 		if (!per.alive)
 			continue;
 
-		bool broken = bp.bone_integrity == 0;
-		if (broken && bp.type == head)
+		if (bp.type == head && bp.health <= 0)
 			per.kill();
-		if (bp.type == torso_middle && broken)
+		if (bp.type == torso_middle && bp.bone_integrity == 0)
 			paralyze = true;
 
 		if (paralyze)
