@@ -323,6 +323,7 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 		Vector2 bp_area = textureSize(bp.texture) * PIXEL_TO_METER;
 		Vector2 bp_pos = pos + off;
 		rb.initialize(world, bp_pos, bp_area, PERSON_DENSITY, flip);
+		b2Body_EnableSleep(rb.id, false);
 		bodyPartSetLayers(bp);
 
 		/* connect torso with joints */
