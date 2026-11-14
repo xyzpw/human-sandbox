@@ -199,6 +199,17 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 	}
 }
 
+static void personUpdateConsciousness(Person &per)
+{
+	bool heart = per.hasHeartbeat();
+	if (!heart && per.consciousness > 0) {
+		float f = GetFrameTime() / 8;
+		per.consciousness = clamp01(per.consciousness - f);
+		if (per.consciousness == 0)
+			per.setPose(PoseType::rest);
+	}
+}
+
 /*
  * process the damage of each body part
  */
@@ -226,13 +237,6 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 
 		if (paralyze)
 			bp.disable();
-	}
-
-	if (heart_stopped && per.consciousness > 0) {
-		float f = GetFrameTime() / 8;
-		per.consciousness = clamp01(per.consciousness - f);
-		if (per.consciousness == 0)
-			per.setPose(PoseType::rest);
 	}
 }
 
@@ -423,6 +427,7 @@ void Person::destroy()
 void Person::update(GameContext &context)
 {
 	personUpdateBodyDamage(*this, context);
+	personUpdateConsciousness(*this);
 }
 
 void Person::setPose(PoseType p)
