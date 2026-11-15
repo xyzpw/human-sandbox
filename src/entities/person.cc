@@ -138,67 +138,6 @@ static float poseBodyPartHertz(PoseType p, BodyPartType bp)
 		return conf.leg_frequency;
 }
 
-static void bodyPartIntegrityValidate(BodyPart &bp,
-				      const GameContext &cont)
-{
-	const Camera2D &cam = cont.camera;
-	const b2ContactEvents &contacts = cont.physics.contact_events;
-	const Rigidbody &rb = bp.rigidbody;
-
-	bool visible = cameraIsVisible(cam, bodyScreenPosition(rb.id, cam));
-	float volume = Normalize(cam.zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX);
-
-	auto fn_torque_stress = [&](const JointRev &jt) {
-		if (!b2RevoluteJoint_IsLimitEnabled(jt.id))
-			return 0.f;
-
-		float tor = std::fabs(jt.getTorque());
-		float stress = (tor / bp.break_force_torque - 1) * GetFrameTime();
-		return clamp01(stress);
-	};
-	auto fn_hit_valid = [&](const b2ContactHitEvent &e) {
-		if (B2_ID_EQUALS(e.shapeIdA, e.shapeIdB))
-			return false;
-		return B2_ID_EQUALS(e.shapeIdA, rb.id) ||
-			B2_ID_EQUALS(e.shapeIdB, rb.id);
-	};
-
-	float stress_max = 0;
-	for (auto &jt : bp.joints) {
-		if (!jt)
-			continue;
-
-		float f = fn_torque_stress(jt);
-		if (f > stress_max)
-			stress_max = f;
-	}
-	for (int i = 0; i < contacts.hitCount; i++) {
-		const b2ContactHitEvent &hit = contacts.hitEvents[i];
-		if (!fn_hit_valid(hit))
-			continue;
-
-		float momentum = rb.getMass() * hit.approachSpeed;
-		if (momentum > bp.impact_resistance)
-			bp.health -= momentum / (2 * bp.impact_resistance);
-		if (bp.bone_integrity > 0 && momentum > bp.break_force)
-			bp.breakBone();
-	}
-	if (stress_max > 0 && bp.bone_integrity > 0) {
-		bp.bone_integrity = clamp01(bp.bone_integrity - stress_max);
-		if (bp.bone_integrity == 0) {
-			bp.breakBone();
-			bp.health = 0;
-			if (visible)
-				asset_manager.playSound("bone_snap.mp3", volume);
-		}
-	}
-
-	if (stress_max == 0 && isOpenUnitInterval(bp.bone_integrity)) {
-		float f = 0.1f * GetFrameTime();
-		bp.bone_integrity += bp.bone_integrity * f;
-	}
-}
-
 static void bodyPartCheckHit(BodyPart &bp, const b2ContactHitEvent &hit)
 {
 	if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
@@ -283,10 +222,14 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 {
 	using enum BodyPartType;
 
+	const b2ContactEvents &contacts = cont.physics.contact_events;
+
 	bool paralyze = false;
 	bool heart_stopped = !per.hasHeartbeat();
+
 	for (auto &bp : per.body_parts) {
-		bodyPartIntegrityValidate(bp, cont);
+		bodyPartCheckHitEvents(bp, contacts);
+		bodyPartCheckTorque(bp, cont.camera);
 
 		if (heart_stopped) {
 			float f = 1.f / (bp.hasBrain() ? 15 : 300);
