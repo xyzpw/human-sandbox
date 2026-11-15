@@ -199,6 +199,72 @@ static void bodyPartIntegrityValidate(BodyPart &bp,
 	}
 }
 
+static void bodyPartCheckHit(BodyPart &bp, const b2ContactHitEvent &hit)
+{
+	if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
+		return;
+
+	Rigidbody &rb = bp.rigidbody;
+	if (!B2_ID_EQUALS(hit.shapeIdA, rb.shape_id) &&
+	    !B2_ID_EQUALS(hit.shapeIdB, rb.shape_id))
+		return;
+
+	float momentum = rb.getMass() * hit.approachSpeed;
+	if (momentum > bp.impact_resistance) {
+		bp.health -= momentum / (2 * bp.impact_resistance);
+	}
+}
+
+/*
+ * handle each hit event on body part, e.g. impact damage
+ */
+static void bodyPartCheckHitEvents(BodyPart &bp, const b2ContactEvents &events)
+{
+	for (int i = 0; i < events.hitCount; ++i) {
+		bodyPartCheckHit(bp, events.hitEvents[i]);
+	}
+}
+
+/*
+ * handle torque damage applied to body part joints
+ */
+static void bodyPartCheckTorque(BodyPart &bp, Camera2D cam)
+{
+	float stress_max = 0;
+
+	for (auto &jt : bp.joints) {
+		if (!jt)
+			continue;
+
+		float tor = std::fabs(jt.getTorque());
+		float stress = (tor / bp.break_force_torque - 1) * GetFrameTime();
+		stress = clamp01(stress);
+
+		if (stress > stress_max)
+			stress_max = stress;
+	}
+
+	if (stress_max == 0) {
+		if (isOpenUnitInterval(bp.bone_integrity)) {
+			float f = bp.bone_integrity * 0.1f;
+			bp.bone_integrity += f * GetFrameTime();
+		}
+		return;
+	}
+
+	bp.bone_integrity = clamp01(bp.bone_integrity - stress_max);
+	if (bp.bone_integrity > 0)
+		return;
+
+	bp.breakBone();
+	bp.health = std::fmin(0, bp.health);
+
+	Vector2 v = bodyScreenPosition(bp.rigidbody.id, cam);
+	float volume = Normalize(cam.zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX);
+	if (cameraIsVisible(cam, v))
+		asset_manager.playSound("bone_snap.mp3", volume);
+}
+
 static void personUpdateConsciousness(Person &per)
 {
 	bool heart = per.hasHeartbeat();
