@@ -219,6 +219,17 @@ static void personUpdateConsciousness(Person &per)
 	using enum PoseType;
 
 	bool heart = per.hasHeartbeat();
+
+	if (heart && per.consciousness < 1) {
+		const BodyPart &head = per.body_parts[0];
+
+		float f = 0.172f * head.health * GetFrameTime();
+		per.consciousness = clamp01(per.consciousness + f);
+
+		if (per.isConscious() && per.pose == rest)
+			per.setPose(standing);
+	}
+
 	if (!heart && per.consciousness > 0) {
 		float f = GetFrameTime() / 8;
 		per.consciousness = clamp01(per.consciousness - f);
