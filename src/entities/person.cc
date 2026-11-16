@@ -138,7 +138,8 @@ static float poseBodyPartHertz(PoseType p, BodyPartType bp)
 		return conf.leg_frequency;
 }
 
-static void bodyPartCheckHit(BodyPart &bp, const b2ContactHitEvent &hit)
+static void bodyPartCheckHit(BodyPart &bp, Person &per,
+			     const b2ContactHitEvent &hit)
 {
 	if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
 		return;
@@ -150,24 +151,33 @@ static void bodyPartCheckHit(BodyPart &bp, const b2ContactHitEvent &hit)
 
 	float momentum = rb.getMass() * hit.approachSpeed;
 	if (momentum > bp.impact_resistance) {
-		bp.health -= momentum / (2 * bp.impact_resistance);
+		float f = momentum / (2 * bp.impact_resistance);
+		bp.health -= f;
+
+		if (bp.type != BodyPartType::head)
+			return;
+
+		per.consciousness = clamp01(per.consciousness - f);
+		if (!per.isConscious() && per.pose != PoseType::rest)
+			per.setPose(PoseType::rest);
 	}
 }
 
 /*
  * handle each hit event on body part, e.g. impact damage
  */
-static void bodyPartCheckHitEvents(BodyPart &bp, const b2ContactEvents &events)
+static void bodyPartCheckHitEvents(BodyPart &bp, Person &per,
+				   const b2ContactEvents &events)
 {
 	for (int i = 0; i < events.hitCount; ++i) {
-		bodyPartCheckHit(bp, events.hitEvents[i]);
+		bodyPartCheckHit(bp, per, events.hitEvents[i]);
 	}
 }
 
 /*
  * handle torque damage applied to body part joints
  */
-static void bodyPartCheckTorque(BodyPart &bp, Camera2D cam)
+static void bodyPartCheckTorque(BodyPart &bp, Person &per, Camera2D cam)
 {
 	float stress_max = 0;
 
@@ -206,12 +216,14 @@ static void bodyPartCheckTorque(BodyPart &bp, Camera2D cam)
 
 static void personUpdateConsciousness(Person &per)
 {
+	using enum PoseType;
+
 	bool heart = per.hasHeartbeat();
 	if (!heart && per.consciousness > 0) {
 		float f = GetFrameTime() / 8;
 		per.consciousness = clamp01(per.consciousness - f);
-		if (per.consciousness == 0)
-			per.setPose(PoseType::rest);
+		if (!per.isConscious() && per.pose != rest)
+			per.setPose(rest);
 	}
 }
 
@@ -228,8 +240,8 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 	bool heart_stopped = !per.hasHeartbeat();
 
 	for (auto &bp : per.body_parts) {
-		bodyPartCheckHitEvents(bp, contacts);
-		bodyPartCheckTorque(bp, cont.camera);
+		bodyPartCheckHitEvents(bp, per, contacts);
+		bodyPartCheckTorque(bp, per, cont.camera);
 
 		if (heart_stopped) {
 			float f = 1.f / (bp.hasBrain() ? 15 : 300);
@@ -424,6 +436,8 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 	/* foot */
 	fn_limit(*getBodyPart(leg_lower, true), -0.1, 0.15);
 	fn_limit(*getBodyPart(leg_lower, false), -0.1, 0.15);
+
+	setPose(PoseType::rest);
 }
 
 void Person::destroy()
@@ -451,6 +465,8 @@ void Person::setPose(PoseType p)
 			jt.set_damping_ratio(damp);
 		}
 	}
+
+	pose = p;
 }
 
 void Person::kill()
@@ -460,4 +476,5 @@ void Person::kill()
 	}
 
 	alive = false;
+	consciousness = 0;
 }

@@ -74,6 +74,8 @@ struct BodyPart : Entity {
 struct Person {
 	std::vector<BodyPart> body_parts;
 
+	PoseType pose;
+
 	bool alive;
 	float consciousness;
 
@@ -94,6 +96,7 @@ struct Person {
 		}
 		return false;
 	}
+	bool isConscious() const { return consciousness > 0.9f; }
 
 	BodyPart *getBodyPart(BodyPartType t, bool background)
 	{
