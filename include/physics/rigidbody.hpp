@@ -11,7 +11,7 @@ struct Rigidbody {
 
 	/*
 	 * @area: size of shape
-	 * @density: density in kg/px^3
+	 * @density: shape density
 	 * @flip: flip rotation
 	 */
 	void initialize(b2WorldId world, Vector2 position,
