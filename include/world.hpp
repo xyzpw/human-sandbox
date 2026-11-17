@@ -54,7 +54,9 @@ struct World {
 	std::vector<WorldItem> items;
 
 	void initialize(b2WorldId world_id);
+
 	void clearItems();
+	void clearLiving();
 	void undoSpawn();
 
 	void update(GameContext &context);

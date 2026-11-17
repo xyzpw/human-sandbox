@@ -214,4 +214,7 @@ void Game::handleInputInteraction(float dt)
 		else
 			world.undoSpawn();
 	}
+	if (IsKeyPressed(KEY_X)) {
+		world.clearLiving();
+	}
 }

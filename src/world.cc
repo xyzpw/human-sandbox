@@ -49,6 +49,20 @@ void World::clearItems()
 	toast_manager.notify("cleared items");
 }
 
+void World::clearLiving()
+{
+	auto pred = [](WorldItem &i) {
+		if (!i.isType<Person>())
+			return false;
+
+		i.destroy();
+		return true;
+	};
+
+	std::erase_if(items, pred);
+	toast_manager.notify("cleared living");
+}
+
 void World::undoSpawn()
 {
 	if (items.empty())
