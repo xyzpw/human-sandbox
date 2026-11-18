@@ -369,7 +369,7 @@ void Person::create(GameContext &context, Vector2 pos, bool flip)
 	int size = (int)BodyPartType::_count;
 	for (int i = 0; i < size; i++) {
 		BodyPartType type = (BodyPartType)i;
-		BodyPart bp{.type = type};
+		BodyPart bp{.type = type, .background = true};
 
 		bp.loadDefaults(type);
 		bp.flip = flip;
@@ -394,7 +394,7 @@ void Person::create(GameContext &context, Vector2 pos, bool flip)
 		/* add foreground body part */
 		if (bodyPartIsPaired(type)) {
 			BodyPart tmp = bp; // copy of current
-			tmp.background = true;
+			tmp.background = false;
 			// re-initialize
 			tmp.rigidbody = phys.createRigidbody(bp_pos, bp_area,
 							     PERSON_DENSITY,
