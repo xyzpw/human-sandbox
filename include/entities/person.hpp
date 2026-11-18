@@ -14,6 +14,7 @@ struct GameContext;
 constexpr Color PERSON_TINT = {190, 190, 190, 255};
 constexpr float PERSON_DENSITY = 70.f /
 	(11 * 89 * PIXEL_TO_METER * PIXEL_TO_METER);
+constexpr float PERSON_CONSCIOUS_THRESHOLD = 0.9f;
 
 struct PoseConfig {
 	float base_frequency;
@@ -96,7 +97,10 @@ struct Person {
 		}
 		return false;
 	}
-	bool isConscious() const { return consciousness > 0.9f; }
+	bool isConscious() const
+	{
+		return consciousness >= PERSON_CONSCIOUS_THRESHOLD;
+	}
 
 	BodyPart *getBodyPart(BodyPartType t, bool background)
 	{
