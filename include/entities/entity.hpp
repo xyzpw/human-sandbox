@@ -6,6 +6,6 @@
 struct Entity {
 	Texture2D texture;
 	Color tint;
-	Rigidbody rigidbody;
+	Rigidbody *rigidbody = nullptr;
 	bool flip = false;
 };

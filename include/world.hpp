@@ -41,7 +41,7 @@ struct WorldItem {
 	void destroy()
 	{
 		if (Entity *ent = std::get_if<Entity>(&item))
-			ent->rigidbody.destroy();
+			ent->rigidbody->destroy();
 		else if (Person *per = std::get_if<Person>(&item))
 			per->destroy();
 	}
@@ -61,10 +61,10 @@ struct World {
 
 	void update(GameContext &context);
 
-	void spawnItem(b2WorldId world_id, const Spawnable &,
+	void spawnItem(GameContext &context, const Spawnable &,
 		       Vector2 position, bool flip = false);
-	void spawnPerson(b2WorldId id, Vector2 position,
-			  bool flip = false);
+	void spawnPerson(GameContext &context, Vector2 position,
+			 bool flip = false);
 
 	Rigidbody *getBodyAt(Vector2 position);
 

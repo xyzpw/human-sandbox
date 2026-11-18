@@ -26,7 +26,7 @@ static void drawFlagDetailed(const World &world, Camera2D cam)
 		const Person &per = *it.get_if<Person>();
 
 		for (const auto &bp : per.body_parts) {
-			Vector2 pos = bodyScreenPosition(bp.rigidbody.id, cam);
+			Vector2 pos = bodyScreenPosition(bp.rigidbody->id, cam);
 			DrawCircleV(pos, 2, fn_col(bp.healthLowest()));
 		}
 	}
@@ -97,6 +97,8 @@ void Game::update(float dt)
 		else
 			PlayMusicStream(amb);
 	}
+
+	physics.lateUpdate();
 }
 
 void Game::draw() const
@@ -188,7 +190,7 @@ void Game::handleInputInteraction(float dt)
 		Vector2 v = GetScreenToWorld2D(GetMousePosition(),
 					       context.camera);
 		bool flip = spawn_dir == -1;
-		world.spawnItem(phys.world_id, s.spawnable, v, flip);
+		world.spawnItem(context, s.spawnable, v, flip);
 	}
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !sidebar_hovering) {

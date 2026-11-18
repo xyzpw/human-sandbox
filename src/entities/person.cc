@@ -12,6 +12,7 @@
 #include "constants.hpp"
 #include "context.hpp"
 #include "physics/joint.hpp"
+#include "physics/manager.hpp"
 
 /*
  * check if person should have two same body parts, i.e. one as background
@@ -56,7 +57,7 @@ static Vector2 personBodyPartOffset(BodyPartType t)
  */
 static b2Vec2 bodyPartJointPosition(const BodyPart &bp, bool top = false)
 {
-	b2Vec2 pos = bp.rigidbody.getPosition();
+	b2Vec2 pos = bp.rigidbody->getPosition();
 	Vector2 size = textureSize(bp.texture);
 	float dy = 0.5f * size.y * PIXEL_TO_METER;
 	if (!top)
@@ -77,8 +78,11 @@ static b2Vec2 bodyPartJointPosition(const BodyPart &bp, bool top = false)
 static void bodyPartAddJoint(b2WorldId world, BodyPart &a, BodyPart &b,
 			     bool top = false)
 {
+	b2BodyId id_a = a.rigidbody->id;
+	b2BodyId id_b = b.rigidbody->id;
+
 	b2Vec2 pos = bodyPartJointPosition(a, top);
-	JointRev rev(world, a.rigidbody.id, b.rigidbody.id, pos, false);
+	JointRev rev(world, id_a, id_b, pos, false);
 	rev.enableSpring(true);
 	rev.enableMotor(true);
 	rev.setMotorSpeed(0);
@@ -118,8 +122,8 @@ static void bodyPartSetLayers(BodyPart &bp)
 	default:
 		break;
 	}
-	bp.rigidbody.setCollisionCategory(cat);
-	bp.rigidbody.setCollisionMask(COLLISION_ALL & ~ex);
+	bp.rigidbody->setCollisionCategory(cat);
+	bp.rigidbody->setCollisionMask(COLLISION_ALL & ~ex);
 }
 
 static float poseBodyPartHertz(PoseType p, BodyPartType bp)
@@ -144,7 +148,7 @@ static void bodyPartCheckHit(BodyPart &bp, Person &per,
 	if (B2_ID_EQUALS(hit.shapeIdA, hit.shapeIdB))
 		return;
 
-	Rigidbody &rb = bp.rigidbody;
+	Rigidbody &rb = *bp.rigidbody;
 	if (!B2_ID_EQUALS(hit.shapeIdA, rb.shape_id) &&
 	    !B2_ID_EQUALS(hit.shapeIdB, rb.shape_id))
 		return;
@@ -208,7 +212,7 @@ static void bodyPartCheckTorque(BodyPart &bp, Person &per, Camera2D cam)
 	bp.breakBone();
 	bp.health = std::fmin(0, bp.health);
 
-	Vector2 v = bodyScreenPosition(bp.rigidbody.id, cam);
+	Vector2 v = bodyScreenPosition(bp.rigidbody->id, cam);
 	float volume = Normalize(cam.zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX);
 	if (cameraIsVisible(cam, v))
 		asset_manager.playSound("bone_snap.mp3", volume);
@@ -347,9 +351,12 @@ void BodyPart::breakBone()
 	bone_integrity = 0;
 }
 
-void Person::create(b2WorldId world, Vector2 pos, bool flip)
+void Person::create(GameContext &context, Vector2 pos, bool flip)
 {
 	using enum BodyPartType;
+
+	b2WorldId world = context.physics.world_id;
+	PhysicsManager &phys = context.physics;
 
 	auto fn_connect = [&](BodyPart &prev, BodyPart &curr,
 			      bool top = false) {
@@ -363,7 +370,6 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 	for (int i = 0; i < size; i++) {
 		BodyPartType type = (BodyPartType)i;
 		BodyPart bp{.type = type};
-		Rigidbody &rb = bp.rigidbody;
 
 		bp.loadDefaults(type);
 		bp.flip = flip;
@@ -371,7 +377,10 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 		Vector2 off = personBodyPartOffset(type);
 		Vector2 bp_area = textureSize(bp.texture) * PIXEL_TO_METER;
 		Vector2 bp_pos = pos + off;
-		rb.initialize(world, bp_pos, bp_area, PERSON_DENSITY, flip);
+		bp.rigidbody = phys.createRigidbody(bp_pos, bp_area,
+						    PERSON_DENSITY, flip);
+		Rigidbody &rb = *bp.rigidbody;
+
 		b2Body_EnableSleep(rb.id, false);
 		bodyPartSetLayers(bp);
 
@@ -385,11 +394,11 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 		/* add foreground body part */
 		if (bodyPartIsPaired(type)) {
 			BodyPart tmp = bp; // copy of current
-			Rigidbody &tmp_rb = tmp.rigidbody;
 			tmp.background = true;
 			// re-initialize
-			tmp_rb.initialize(world, bp_pos, bp_area,
-					  PERSON_DENSITY, flip);
+			tmp.rigidbody = phys.createRigidbody(bp_pos, bp_area,
+							     PERSON_DENSITY,
+							     flip);
 			bodyPartSetLayers(tmp);
 			body_parts.push_back(tmp);
 		}
@@ -454,7 +463,7 @@ void Person::create(b2WorldId world, Vector2 pos, bool flip)
 void Person::destroy()
 {
 	for (auto &bp : body_parts) {
-		bp.rigidbody.destroy();
+		bp.rigidbody->destroy();
 	}
 }
 

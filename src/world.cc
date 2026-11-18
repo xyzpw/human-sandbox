@@ -81,11 +81,13 @@ void World::update(GameContext &context)
 	}
 }
 
-void World::spawnItem(b2WorldId world_id, const Spawnable &s,
+void World::spawnItem(GameContext &context, const Spawnable &s,
 		      Vector2 position, bool flip)
 {
+	PhysicsManager &phys = context.physics;
+
 	if (s.type == SpawnableType::person) {
-		spawnPerson(world_id, position, flip);
+		spawnPerson(context, position, flip);
 		return;
 	}
 
@@ -93,19 +95,18 @@ void World::spawnItem(b2WorldId world_id, const Spawnable &s,
 		.texture = asset_manager.getTexture(s.texture_name),
 		.tint = s.tint,
 	};
-	ent.rigidbody.initialize(world_id, position,
-				 textureSize(ent.texture) * PIXEL_TO_METER,
-				 spawnableDensity(s.type), flip);
+	Vector2 area = textureSize(ent.texture) * PIXEL_TO_METER;
+	float density = spawnableDensity(s.type);
+	ent.rigidbody = phys.createRigidbody(position, area, density, flip);
 	items.emplace_back(ent);
 
 	toast_manager.notify("spawn {}", s.name);
 }
 
-void World::spawnPerson(b2WorldId id, Vector2 position, bool flip)
+void World::spawnPerson(GameContext &context, Vector2 position, bool flip)
 {
-
 	Person person{};
-	person.create(id, position, flip);
+	person.create(context, position, flip);
 	person.setPose(PoseType::standing);
 	items.emplace_back(person);
 
@@ -123,7 +124,7 @@ Rigidbody *World::getBodyAt(Vector2 position)
 	 * return: true on success
 	 */
 	auto fn = [&](Entity &e) {
-		Rigidbody &rb = e.rigidbody;
+		Rigidbody &rb = *e.rigidbody;
 		if (b2Body_GetShapeCount(rb.id) == 0)
 			return false;
 
@@ -174,7 +175,8 @@ std::vector<Person *> World::getPeople()
 void World::drawForeground() const
 {
 	auto fn = [&](const Entity &e) {
-		const Rigidbody &rb = e.rigidbody;
+		const Rigidbody &rb = *e.rigidbody;
+
 		float rot = -bodyAngle(rb.id) * RAD2DEG;
 		Vector2 pos = b2ToVec(rb.getPosition() * METER_TO_PIXEL);
 		drawTextureCenter(e.texture, pos, rot,

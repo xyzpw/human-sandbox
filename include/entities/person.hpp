@@ -79,7 +79,7 @@ struct Person {
 	bool alive;
 	float consciousness;
 
-	void create(b2WorldId world, Vector2 pos, bool flip = false);
+	void create(GameContext &context, Vector2 pos, bool flip = false);
 	void destroy();
 
 	void update(GameContext &context);

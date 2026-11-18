@@ -3,9 +3,20 @@
 #include <raymath.h>
 #include <box2d/box2d.h>
 #include <box2d/id.h>
+#include <vector>
+#include <memory>
 #include "constants.hpp"
 #include "utils/math.hpp"
 #include "physics/rigidbody.hpp"
+
+static void physicsPruneRigidbodies(PhysicsManager &phys)
+{
+	auto pred = [&](auto &a) {
+		return !b2Body_IsValid(a->id);
+	};
+
+	std::erase_if(phys.rigidbodies, pred);
+}
 
 void PhysicsManager::initialize()
 {
@@ -19,6 +30,8 @@ void PhysicsManager::initialize()
 
 void PhysicsManager::update(float dt)
 {
+	physicsPruneRigidbodies(*this);
+
 	if (!paused) {
 		step_accumulator += dt;
 		while (step_accumulator >= PHYSICS_STEP_TIME) {
@@ -26,12 +39,35 @@ void PhysicsManager::update(float dt)
 			step_accumulator -= PHYSICS_STEP_TIME;
 		}
 		contact_events = b2World_GetContactEvents(world_id);
+
+		for (auto &rb : rigidbodies) {
+			b2Vec2 dv = rb->getVelocity() - rb->velocity_prev;
+
+			rb->acceleration = dv / GetFrameTime();
+		}
 	}
 }
 
 void PhysicsManager::updateMouseJoint(b2Vec2 v)
 {
 	b2MouseJoint_SetTarget(mouse_joint, v);
+}
+
+void PhysicsManager::lateUpdate()
+{
+	for (auto &rb : rigidbodies) {
+		rb->velocity_prev = rb->getVelocity();
+	}
+}
+
+Rigidbody *PhysicsManager::createRigidbody(Vector2 position_px, Vector2 area,
+					   float density, bool flip)
+{
+	auto rb = std::make_unique<Rigidbody>();
+	rb->initialize(world_id, position_px, area, density, flip);
+
+	rigidbodies.push_back(std::move(rb));
+	return rigidbodies.back().get();
 }
 
 void PhysicsManager::bodyGrab(Rigidbody *rb, b2Vec2 target)

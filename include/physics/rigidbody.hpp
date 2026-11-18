@@ -9,6 +9,9 @@ struct Rigidbody {
 	b2ShapeDef shape_def;
 	b2ShapeId shape_id;
 
+	b2Vec2 velocity_prev;
+	b2Vec2 acceleration;
+
 	/*
 	 * @area: size of shape
 	 * @density: shape density
@@ -22,6 +25,7 @@ struct Rigidbody {
 	void destroy() { b2DestroyBody(id); }
 
 	b2Vec2 getPosition() const { return b2Body_GetPosition(id); }
+	b2Vec2 getVelocity() const { return b2Body_GetLinearVelocity(id); }
 	b2Rot getRotation() const { return b2Body_GetRotation(id); }
 	float getMass() const { return b2Body_GetMass(id); }
 
