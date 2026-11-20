@@ -101,6 +101,22 @@ struct Person {
 	{
 		return consciousness >= PERSON_CONSCIOUS_THRESHOLD;
 	}
+	/*
+	 * set consciousness
+	 *
+	 * note: consciousness will be clamped between 0 and 1
+	 */
+	void setConsciousness(float f)
+	{
+		bool con_prev = isConscious();
+		consciousness = Clamp(f, 0, 1);
+		bool con_after = isConscious();
+
+		if (con_prev && !con_after)
+			setPose(PoseType::rest);
+		else if (!con_prev && con_after)
+			setPose(PoseType::standing);
+	}
 
 	BodyPart *getBodyPart(BodyPartType t, bool background)
 	{

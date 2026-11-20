@@ -161,9 +161,7 @@ static void bodyPartCheckHit(BodyPart &bp, Person &per,
 		if (bp.type != BodyPartType::head)
 			return;
 
-		per.consciousness = clamp01(per.consciousness - f);
-		if (!per.isConscious() && per.pose != PoseType::rest)
-			per.setPose(PoseType::rest);
+		per.setConsciousness(per.consciousness - f);
 	}
 }
 
@@ -228,17 +226,12 @@ static void personUpdateConsciousness(Person &per)
 		const BodyPart &head = per.body_parts[0];
 
 		float f = 0.172f * head.health * GetFrameTime();
-		per.consciousness = clamp01(per.consciousness + f);
-
-		if (per.isConscious() && per.pose == rest)
-			per.setPose(standing);
+		per.setConsciousness(per.consciousness + f);
 	}
 
 	if (!heart && per.consciousness > 0) {
 		float f = GetFrameTime() / 8;
-		per.consciousness = clamp01(per.consciousness - f);
-		if (!per.isConscious() && per.pose != rest)
-			per.setPose(rest);
+		per.setConsciousness(per.consciousness - f);
 	}
 }
 
