@@ -14,6 +14,11 @@
 #include "physics/joint.hpp"
 #include "physics/manager.hpp"
 
+// squared acceleration at which loss of consciousness occurs
+constexpr float loc_accel_sq = 89 * 89;
+// loss of conscious rate per acceleration threshold
+constexpr float accel_loc_rate = 0.11f * (1 - PERSON_CONSCIOUS_THRESHOLD);
+
 /*
  * check if person should have two same body parts, i.e. one as background
  *
@@ -216,6 +221,22 @@ static void bodyPartCheckTorque(BodyPart &bp, Person &per, Camera2D cam)
 		asset_manager.playSound("bone_snap.mp3", volume);
 }
 
+static void personCheckAcceleration(Person &per)
+{
+	BodyPart head = per.body_parts[0];
+
+	if (per.alive) {
+		float acc_sq = b2LengthSquared(head.rigidbody->acceleration);
+
+		if (acc_sq > loc_accel_sq) {
+			float loc = acc_sq / loc_accel_sq;
+			loc *= accel_loc_rate * GetFrameTime();
+
+			per.setConsciousness(per.consciousness - loc);
+		}
+	}
+}
+
 static void personUpdateConsciousness(Person &per)
 {
 	using enum PoseType;
@@ -267,6 +288,8 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 		if (paralyze)
 			bp.disable();
 	}
+
+	personCheckAcceleration(per);
 }
 
 void BodyPart::loadDefaults(BodyPartType t)
