@@ -97,6 +97,7 @@ struct Person {
 		}
 		return false;
 	}
+	bool isBraindead() const { return body_parts[0].health <= 0; }
 	bool isConscious() const
 	{
 		return consciousness >= PERSON_CONSCIOUS_THRESHOLD;
