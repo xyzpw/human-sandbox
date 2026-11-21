@@ -490,6 +490,9 @@ void Person::destroy()
 
 void Person::update(GameContext &context)
 {
+	if (context.physics.paused)
+		return;
+
 	personUpdateBodyDamage(*this, context);
 	personUpdateConsciousness(*this);
 }
