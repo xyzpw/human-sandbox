@@ -20,15 +20,13 @@ void ToastManager::update(float dt)
 
 void ToastManager::drawOverlay() const
 {
-	const float fontsize = 14;
-
 	float y = GetScreenHeight();
+
 	int size = notifications.size();
 	for (int i = size - 1; i >= 0; i--) {
 		const ToastNotification &no = notifications[i];
-		float x = GetScreenWidth() -
-			0.66f * fontsize * no.text.length();
 		y -= fontsize * 1.1f;
-		DrawText(no.text.c_str(), x, y, fontsize, WHITE);
+
+		DrawText(no.text.c_str(), no.x, y, fontsize, WHITE);
 	}
 }
