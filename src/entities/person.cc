@@ -268,6 +268,11 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 	bool paralyze = false;
 	bool heart_stopped = !per.hasHeartbeat();
 
+	if (per.isBraindead() && !heart_stopped) {
+		float f = GetFrameTime() / 15;
+		per.body_parts[(int)torso_top].health -= f;
+	}
+
 	for (auto &bp : per.body_parts) {
 		bodyPartCheckHitEvents(bp, per, contacts);
 		bodyPartCheckTorque(bp, per, cont.camera);
