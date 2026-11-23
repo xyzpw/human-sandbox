@@ -38,7 +38,7 @@ constexpr PoseConfig pose_configs[(int)PoseType::_count] = {
 		.torso_bottom_frequency = 7,
 		.leg_frequency = 10,
 		.base_damping = 0.97,
-	}
+	},
 };
 
 struct BodyPart : Entity {
