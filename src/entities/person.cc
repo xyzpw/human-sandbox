@@ -134,6 +134,7 @@ static void bodyPartSetLayers(BodyPart &bp)
 static float poseBodyPartHertz(PoseType p, BodyPartType bp)
 {
 	using enum BodyPartType;
+
 	const PoseConfig &conf = pose_configs[(int)p];
 
 	if (bp == torso_bottom)
