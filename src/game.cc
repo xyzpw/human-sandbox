@@ -210,13 +210,6 @@ void Game::handleInputInteraction(float dt)
 		input.heldRotate(DEG2RAD * f * rot_dir * dt);
 	}
 
-	if (IsKeyPressed(KEY_Z)) {
-		if (IsKeyDown(KEY_LEFT_SHIFT))
-			world.clearItems();
-		else
-			world.undoSpawn();
-	}
-	if (IsKeyPressed(KEY_X)) {
-		world.clearLiving();
-	}
+	if (IsKeyPressed(KEY_Z))
+		world.undoSpawn();
 }
