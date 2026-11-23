@@ -261,7 +261,7 @@ static void personCheckAcceleration(Person &per)
 		float acc_sq = b2LengthSquared(head.rigidbody->acceleration);
 
 		if (acc_sq > loc_accel_sq) {
-			float loc = acc_sq / loc_accel_sq;
+			float loc = std::sqrtf(acc_sq / loc_accel_sq);
 			loc *= accel_loc_rate * GetFrameTime();
 
 			per.setConsciousness(per.consciousness - loc);
