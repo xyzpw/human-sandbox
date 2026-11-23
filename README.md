@@ -19,7 +19,7 @@ $ ./sandbox
 
 ## Controls
 - spawn item: `E` (flipped `Q`)
-- undo spawn: `Z` (`SHIFT+Z` to clear all)
+- undo spawn: `Z`
 - move camera: middle click and move mouse
 - measure: left click and move mouse
 - pause time: `SPACE`
