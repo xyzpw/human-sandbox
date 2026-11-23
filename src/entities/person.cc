@@ -181,6 +181,38 @@ static void bodyPartCheckHitEvents(BodyPart &bp, Person &per,
 	}
 }
 
+static void bodyPartCheckConstraintForces(BodyPart &bp, Person &per)
+{
+	float dt_sq = GetFrameTime() * GetFrameTime();
+	float resist_sq = bp.impact_resistance * bp.impact_resistance;
+
+	float sq_max = 0;
+	for (auto &jt : bp.joints) {
+		if (!jt)
+			continue;
+
+		b2Vec2 force = jt.getConstraintForce();
+		float imp_sq = b2LengthSquared(force) * dt_sq;
+
+		if (imp_sq > sq_max)
+			sq_max = imp_sq;
+	}
+
+	if (sq_max <= resist_sq)
+		return;
+
+	float impulse = std::sqrt(sq_max);
+	float dmg = impulse / (2 * bp.impact_resistance);
+
+	bp.health -= dmg;
+
+	if (bp.hasBrain())
+		per.setConsciousness(per.consciousness - dmg);
+
+	if (impulse >= bp.break_force)
+		bp.breakBone();
+}
+
 /*
  * handle torque damage applied to body part joints
  */
@@ -275,6 +307,7 @@ static void personUpdateBodyDamage(Person &per, const GameContext &cont)
 
 	for (auto &bp : per.body_parts) {
 		bodyPartCheckHitEvents(bp, per, contacts);
+		bodyPartCheckConstraintForces(bp, per);
 		bodyPartCheckTorque(bp, per, cont.camera);
 
 		if (heart_stopped) {
