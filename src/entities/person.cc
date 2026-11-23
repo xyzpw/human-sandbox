@@ -255,7 +255,7 @@ static void bodyPartCheckTorque(BodyPart &bp, Person &per, Camera2D cam)
 
 static void personCheckAcceleration(Person &per)
 {
-	BodyPart head = per.body_parts[0];
+	BodyPart &head = per.body_parts[0];
 
 	if (per.alive) {
 		float acc_sq = b2LengthSquared(head.rigidbody->acceleration);
