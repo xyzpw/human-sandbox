@@ -173,7 +173,7 @@ void Game::handleInputSelection()
 
 	/* select an item from sidebar */
 	if (hovering_sidebar && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-		sidebar.clickMouse(mouse);
+		sidebar.clickMouse(mouse, world);
 }
 
 void Game::handleInputInteraction(float dt)

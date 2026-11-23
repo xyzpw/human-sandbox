@@ -1,4 +1,5 @@
 #include "ui/sidebar.hpp"
+#include "world.hpp"
 #include <raylib.h>
 #include <raymath.h>
 #include "entities/spawnable.hpp"
@@ -25,6 +26,51 @@ static Spawnable createSpawnable(SpawnableType t)
 		break;
 	}
 	return result;
+}
+
+static void sidebarAddButtons(Sidebar &sb)
+{
+	static const Font font = GetFontDefault();
+
+	using Type = SidebarButton::Type;
+
+	int btn_count = (int)Type::_count;
+
+	float spacing_y = 3;
+	float x = 3;
+	float width = sb.width_open - x * 2;
+	float height = 24;
+	float y = (btn_count + 1) * height + (btn_count - 1) * spacing_y;
+	y = (GetScreenHeight() - spacing_y) - y;
+
+	for (int i = 0; i < btn_count; ++i) {
+		Type type = (Type)i;
+		y += height + spacing_y;
+
+		SidebarButton btn{.type = type};
+		btn.area = {x, y, width, height};
+
+		Vector2 text_size{};
+
+		switch (type) {
+		case Type::clear_all:
+			btn.text = "Clear All";
+			break;
+		case Type::clear_living:
+			btn.text = "Clear Living";
+			break;
+		default:
+			continue;
+		}
+
+		text_size = MeasureTextEx(font, btn.text.c_str(), btn.fontsize, 0);
+		btn.text_position = {
+			x + 0.5f * (width - text_size.x),
+			y + 0.5f * (height - text_size.y)
+		};
+
+		sb.buttons.push_back(btn);
+	}
 }
 
 static void sidebarAddSpawnables(Sidebar *sb)
@@ -56,12 +102,16 @@ void Sidebar::initialize()
 		.height = (float)GetScreenHeight()
 	};
 	color = ColorAlpha(BLACK, 1.0f / 6);
+	color_button = ColorAlpha(BLACK, 0.5f);
 
+	sidebarAddButtons(*this);
 	sidebarAddSpawnables(this);
 }
 
-void Sidebar::clickMouse(Vector2 mouse)
+void Sidebar::clickMouse(Vector2 mouse, World &world)
 {
+	using Type = SidebarButton::Type;
+
 	int i = -1;
 	for (const auto &it : items) {
 		i++;
@@ -70,6 +120,16 @@ void Sidebar::clickMouse(Vector2 mouse)
 			selected_index = i;
 			return;
 		}
+	}
+
+	for (const auto &btn : buttons) {
+		if (!CheckCollisionPointRec(mouse, btn.area))
+			continue;
+
+		if (btn.type == Type::clear_all)
+			world.clearItems();
+		if (btn.type == Type::clear_living)
+			world.clearLiving();
 	}
 }
 
@@ -97,5 +157,12 @@ void Sidebar::draw() const
 					   it.area.width, it.area.height,
 					   GREEN);
 		}
+	}
+
+	for (const auto &btn : buttons) {
+		DrawRectangleRec(btn.area, color_button);
+		DrawText(btn.text.c_str(),
+			 btn.text_position.x, btn.text_position.y,
+			 btn.fontsize, WHITE);
 	}
 }

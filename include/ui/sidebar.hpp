@@ -2,7 +2,25 @@
 
 #include <raylib.h>
 #include <vector>
+#include <string>
 #include "entities/spawnable.hpp"
+
+struct World;
+
+struct SidebarButton {
+	enum class Type {
+		clear_all,
+		clear_living,
+		_count
+	};
+
+	Type type;
+
+	Rectangle area;
+	std::string text;
+	const float fontsize = 11;
+	Vector2 text_position;
+};
 
 struct SidebarItem {
 	Rectangle area;
@@ -11,9 +29,10 @@ struct SidebarItem {
 
 struct Sidebar {
 	Rectangle area;
-	Color color;
+	Color color, color_button;
 
 	std::vector<SidebarItem> items;
+	std::vector<SidebarButton> buttons;
 	int selected_index = 0;
 
 	float width_closed, width_open;
@@ -24,7 +43,7 @@ struct Sidebar {
 	/*
 	 * select current spawnable item under mouse
 	 */
-	void clickMouse(Vector2 mouse);
+	void clickMouse(Vector2 mouse, World &world);
 
 	void toggleOpen()
 	{
