@@ -38,6 +38,7 @@ void PhysicsManager::update(float dt)
 			b2World_Step(world_id, PHYSICS_STEP_TIME, 8);
 			step_accumulator -= PHYSICS_STEP_TIME;
 		}
+
 		contact_events = b2World_GetContactEvents(world_id);
 
 		for (auto &rb : rigidbodies) {
