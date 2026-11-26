@@ -4,6 +4,12 @@
 #include <box2d/box2d.h>
 
 float clamp01(float f);
+/*
+ * inverse lerp
+ *
+ * return: normalized position between start and end values
+ */
+float inverseLerp(float a, float b, float val);
 
 /*
  * check if a value is greater than 0 and less than 1

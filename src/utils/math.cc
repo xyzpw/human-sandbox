@@ -8,6 +8,12 @@ float clamp01(float f)
 	return Clamp(f, 0, 1);
 }
 
+float inverseLerp(float a, float b, float val)
+{
+	float ret = (val - a) / (b - a);
+	return clamp01(ret);
+}
+
 bool isOpenUnitInterval(float f)
 {
 	return f > 0 && f < 1;
