@@ -270,6 +270,59 @@ static void personCheckAcceleration(Person &per)
 	}
 }
 
+static void personUpdateFalling(Person &per)
+{
+	if (!per.isConscious())
+		return;
+
+	BodyPart &head = per.body_parts[0];
+	b2Vec2 head_vel = head.rigidbody->getVelocity();
+	float speed_y = std::fabs(head_vel.y);
+
+	if (speed_y < 3) {
+		if (per.falling_time > 0) {
+			per.setPose(PoseType::standing);
+			per.falling_time = 0;
+		}
+		return;
+	} else if (per.falling_time == 0) {
+		for (auto &bp : per.body_parts) {
+			for (auto &jt : bp.joints) {
+				jt.set_max_torque(100);
+			}
+		}
+	}
+
+	per.falling_time += GetFrameTime();
+
+	for (auto &bp : per.body_parts) {
+		if (bp.hasBrain()) {
+			bp.influenceMotorSpeed(0.8f, 1);
+			continue;
+		}
+
+		int dist = bp.getDistanceToBrain();
+		bool torso = bp.isTorso();
+		bool arm = !torso && dist < 4;
+
+		float rad = 0;
+		float influence = 1;
+
+		if (torso) {
+			rad = dist == 1 ? 0.5f : (dist == 2 ? 0.33f : 0.2f);
+			influence = 1;
+		} else if (arm) {
+			rad = speed_y < 10 ? 1.2f : (dist == 2 ? 12.5f : 8);
+			influence = inverseLerp(3, 7, speed_y);
+		} else {
+			rad = -1;
+			influence = inverseLerp(0, 3, speed_y);
+		}
+
+		bp.influenceMotorSpeed(rad, influence);
+	}
+}
+
 static void personUpdateConsciousness(Person &per)
 {
 	using enum PoseType;
@@ -527,6 +580,7 @@ void Person::update(GameContext &context)
 	if (context.physics.paused)
 		return;
 
+	personUpdateFalling(*this);
 	personUpdateBodyDamage(*this, context);
 	personUpdateConsciousness(*this);
 }
@@ -541,6 +595,8 @@ void Person::setPose(PoseType p)
 		for (auto &jt : bp.joints) {
 			jt.set_hertz(hz);
 			jt.set_damping_ratio(damp);
+			jt.setMotorSpeed(0);
+			jt.set_max_torque(0);
 		}
 	}
 

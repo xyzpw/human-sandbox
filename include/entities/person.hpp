@@ -60,6 +60,23 @@ struct BodyPart : Entity {
 	 */
 	void loadDefaults(BodyPartType t);
 
+	/*
+	 * influence motor speed in joints
+	 * @val: motor speed
+	 * @influence: normalized influence
+	 */
+	void influenceMotorSpeed(float val, float influence)
+	{
+		for (auto &jt : joints) {
+			if (!jt)
+				continue;
+
+			float cur = jt.getMotorSpeed();
+			float next = Lerp(cur, val, influence);
+			jt.setMotorSpeed(next);
+		}
+	}
+
 	void disable();
 	void breakBone();
 
@@ -70,6 +87,20 @@ struct BodyPart : Entity {
 
 	bool hasHeart() const { return type == BodyPartType::torso_top; }
 	bool hasBrain() const { return type == BodyPartType::head; }
+	bool isTorso() const
+	{
+		int i = (int)type;
+		return i > 0 && i <= (int)BodyPartType::torso_bottom;
+	}
+
+	int getDistanceToBrain() const
+	{
+		int tp = (int)type;
+		if (tp <= (int)BodyPartType::torso_bottom)
+			return tp;
+
+		return tp - 2;
+	}
 };
 
 struct Person {
@@ -79,6 +110,8 @@ struct Person {
 
 	bool alive;
 	float consciousness;
+
+	float falling_time = 0;
 
 	void create(GameContext &context, Vector2 pos, bool flip = false);
 	void destroy();
