@@ -55,7 +55,7 @@ struct JointRev {
 	 */
 	void setMotorSpeed(float f)
 	{
-		b2RevoluteJoint_SetMotorSpeed(id, f);
+		b2RevoluteJoint_SetTargetMotorSpeed(id, f);
 	}
 	/*
 	 * set max motor torque
