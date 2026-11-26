@@ -51,7 +51,7 @@ void InputManager::bodyTryGrab(World &world, PhysicsManager &phys)
 void InputManager::bodyRelease(PhysicsManager &phys)
 {
 	phys.bodyRelease();
-	b2Body_SetFixedRotation(held_body->id, false);
+	held_body->lockRotation(false);
 	held_body = nullptr;
 }
 
@@ -60,7 +60,7 @@ void InputManager::heldRotate(float f)
 	if (!held_body)
 		return;
 
-	b2Body_SetFixedRotation(held_body->id, true);
+	held_body->lockRotation(true);
 
 	b2Rot next = b2MakeRot(bodyAngle(held_body->id) + f);
 	held_body->setRotation(next);

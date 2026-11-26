@@ -66,4 +66,11 @@ struct Rigidbody {
 		shape_def.filter.maskBits = bits;
 		b2Shape_SetFilter(shape_id, shape_def.filter);
 	}
+
+	void lockRotation(bool val)
+	{
+		b2MotionLocks ml = b2Body_GetMotionLocks(id);
+		ml.angularZ = val;
+		b2Body_SetMotionLocks(id, ml);
+	}
 };

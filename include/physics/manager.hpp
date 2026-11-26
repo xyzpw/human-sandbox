@@ -14,6 +14,7 @@ struct PhysicsManager {
 
 	b2BodyDef ground_def;
 	b2BodyId ground_body;
+	b2BodyId mouse_body;
 	b2JointId mouse_joint;
 
 	b2ContactEvents contact_events;

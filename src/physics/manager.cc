@@ -50,7 +50,8 @@ void PhysicsManager::update(float dt)
 
 void PhysicsManager::updateMouseJoint(b2Vec2 v)
 {
-	b2MouseJoint_SetTarget(mouse_joint, v);
+	b2WorldTransform t = {b2ToPos(v), b2Rot_identity};
+	b2Body_SetTargetTransform(mouse_body, t, PHYSICS_STEP_TIME, true);
 }
 
 void PhysicsManager::lateUpdate()
@@ -74,18 +75,28 @@ void PhysicsManager::bodyGrab(Rigidbody *rb, b2Vec2 target)
 {
 	b2Body_SetAwake(rb->id, true);
 
-	b2MouseJointDef def = b2DefaultMouseJointDef();
-	def.bodyIdA = ground_body;
-	def.bodyIdB = rb->id;
-	def.target = target;
-	def.hertz = 5;
-	def.dampingRatio = 0.9f;
-	def.maxForce = rb->getMass() * 50 / PHYSICS_STEP_TIME;
+	b2Vec2 local_point = b2Body_GetLocalPoint(rb->id, target);
 
-	mouse_joint = b2CreateMouseJoint(world_id, &def);
+	b2BodyDef body_def = b2DefaultBodyDef();
+	body_def.type = b2_kinematicBody;
+	body_def.position = target;
+
+	mouse_body = b2CreateBody(world_id, &body_def);
+
+	b2MotorJointDef def = b2DefaultMotorJointDef();
+	def.base.bodyIdA = mouse_body;
+	def.base.bodyIdB = rb->id;
+	def.base.localFrameA = {b2Vec2_zero, b2Rot_identity};
+	def.base.localFrameB = {local_point, b2Rot_identity};
+	def.linearHertz = 5;
+	def.linearDampingRatio = 0.9f;
+	def.maxSpringForce = rb->getMass() * 50 / PHYSICS_STEP_TIME;
+
+	mouse_joint = b2CreateMotorJoint(world_id, &def);
 }
 
 void PhysicsManager::bodyRelease()
 {
 	b2DestroyJoint(mouse_joint);
+	b2DestroyBody(mouse_body);
 }
