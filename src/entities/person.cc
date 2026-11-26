@@ -436,7 +436,7 @@ void Person::create(GameContext &context, Vector2 pos, bool flip)
 						    PERSON_DENSITY, flip);
 		Rigidbody &rb = *bp.rigidbody;
 
-		b2Body_EnableSleep(rb.id, false);
+		b2Body_EnableSleeping(rb.id, false);
 		bodyPartSetLayers(bp);
 
 		/* connect torso with joints */
