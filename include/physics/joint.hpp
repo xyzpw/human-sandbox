@@ -33,6 +33,10 @@ struct JointRev {
 	{
 		return b2Joint_GetConstraintTorque(id);
 	}
+	float getMotorSpeed() const
+	{
+		return b2RevoluteJoint_GetTargetMotorSpeed(id);
+	}
 	b2Vec2 getConstraintForce() const
 	{
 		return b2Joint_GetConstraintForce(id);
